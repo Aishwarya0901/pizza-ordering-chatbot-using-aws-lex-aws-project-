@@ -1,0 +1,2 @@
+protected readonly BotState ConversationState;
+    protected readonly BotState UserState;
