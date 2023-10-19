@@ -1,0 +1,44 @@
+public class PizzaDialog : ComponentDialog
+{
+    private readonly IStatePropertyAccessor<UserData> _userDataAccessor;
+    private readonly IStatePropertyAccessor<ConversationData> _conversationDataAccessor;
+
+    private static string TOP_LEVEL_WATERFALL_NAME = "INITIAL";
+    private static String NUM_PIZZA_DIALOG_PROMPT_NAME = "NUM_PIZZA_PROMPT";
+
+    public PizzaDialog(UserState userState, ConversationState conversationState)
+        : base(nameof(PizzaDialog))
+    {
+        _userDataAccessor = userState.CreateProperty<UserData>("UserData");
+        _conversationDataAccessor = conversationState.CreateProperty<ConversationData>("ConversationData");
+
+        var topLevelWaterfallSteps = new WaterfallStep[]
+        {
+            StartAsync
+        };
+
+        // This array defines how the Waterfall will execute.
+        var waterfallSteps = new WaterfallStep[]
+        {
+            TakeoutOrDeliveryStepAsync,
+            PizzaTypeStepAsync,
+            PizzaSizeStepAsync,
+            NumberOfPizzasStepAsync,
+            ConfirmOrderStepAsync,
+            PlaceOrderStepAsync
+        };
+
+        // Add named dialogs to the DialogSet. These names are saved in the dialog state.
+        AddDialog(new WaterfallDialog(TOP_LEVEL_WATERFALL_NAME, waterfallSteps));
+        AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
+        AddDialog(new TextPrompt(nameof(TextPrompt)));
+        AddDialog(new NumberPrompt<int>(NUM_PIZZA_DIALOG_PROMPT_NAME, NumPizzaValidator));
+        AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
+        AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));
+
+        // The initial child Dialog to run.
+        InitialDialogId = TOP_LEVEL_WATERFALL_NAME;
+    }
+…
+
+} //end of PizzaDialog class
